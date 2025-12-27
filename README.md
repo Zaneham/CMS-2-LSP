@@ -128,6 +128,18 @@ Licensed under the Apache Licence, Version 2.0. See [LICENSE](LICENSE) for detai
 
 Contributions are welcome! Please open an issue or pull request on GitHub.
 
+## Related Projects
+
+If you've enjoyed programming systems that track things moving through water at high speed, you may wish to consider:
+
+- **[JOVIAL J73 LSP](https://github.com/Zaneham/jovial-lsp)** - The US Air Force's equivalent obsession. Same era, same paranoia, different element. JOVIAL keeps things airborne; CMS-2 keeps things afloat. Synergy.
+
+- **[CORAL 66 LSP](https://github.com/Zaneham/coral66-lsp)** - What happens when the British attempt the same thing. Features HMSO documentation, Crown Copyright, and presumably works in any weather. The Royal Navy presumably ran something similar, though they'd never admit to using American ideas.
+
+- **[HAL/S LSP](https://github.com/Zaneham/hals-lsp)** - NASA's Space Shuttle language. For when the ocean isn't remote enough and you'd prefer your real-time constraints to include vacuum and re-entry heating.
+
+- **[Minuteman Guidance Computer Emulator](https://github.com/Zaneham/Minuteman-computer-emulator)** - An emulator for the computers in those missiles your Aegis system is meant to detect. Circle of life, really.
+
 ## Acknowledgements
 
 - Fleet Combat Direction Systems Support Activity (FCDSSA), San Diego
