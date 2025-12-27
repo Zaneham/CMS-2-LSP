@@ -1,0 +1,99 @@
+{
+  "name": "cms2-lsp",
+  "displayName": "CMS-2 Navy Tactical Language",
+  "description": "Language Server Protocol support for CMS-2 (Compiler Monitor System 2) - the US Navy's tactical combat systems language powering Aegis, submarines, and carriers",
+  "version": "1.0.0",
+  "author": "Zane Hambly",
+  "license": "Apache-2.0",
+  "publisher": "ZaneHambly",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Zaneham/CMS2-LSP"
+  },
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters"
+  ],
+  "keywords": [
+    "cms2",
+    "cms-2",
+    "navy",
+    "military",
+    "aegis",
+    "embedded",
+    "legacy",
+    "tactical",
+    "combat"
+  ],
+  "activationEvents": [
+    "onLanguage:cms2"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "cms2",
+        "aliases": [
+          "CMS-2",
+          "CMS2",
+          "cms2"
+        ],
+        "extensions": [
+          ".cms2",
+          ".cm2",
+          ".cms"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "cms2",
+        "scopeName": "source.cms2",
+        "path": "./syntaxes/cms2.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "CMS-2",
+      "properties": {
+        "cms2.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to Python interpreter for LSP server"
+        },
+        "cms2.serverPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to cms2_lsp_server.py (leave empty to use bundled)"
+        },
+        "cms2.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces communication between VS Code and the CMS-2 language server"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.75.0",
+    "typescript": "^5.0.0"
+  }
+}

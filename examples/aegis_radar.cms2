@@ -1,0 +1,233 @@
+''====================================================''
+'' AEGIS COMBAT SYSTEM - RADAR TRACK PROCESSING      ''
+'' CMS-2Y Sample Code for AN/UYK-43                  ''
+''                                                   ''
+'' This is example code demonstrating CMS-2 syntax   ''
+'' for educational purposes only.                    ''
+''====================================================''
+
+CMODE D $  ''Use decimal constants''
+
+''--------------------------------------------------''
+'' SYSTEM DATA DIVISION - Global declarations       ''
+''--------------------------------------------------''
+RADAR_DD SYS-DD $
+
+    ''Track status enumeration''
+    TYPE TRACK_STATUS 'UNASSIGNED', 'TENTATIVE', 'FIRM', 'LOST' $
+
+    ''Maximum number of tracks''
+    VRBL MAX_TRACKS I 16 U P 256 $
+
+    ''Radar parameters''
+    VRBL SCAN_RATE A 16 S 8 $
+    VRBL ANTENNA_AZ A 16 S 4 $
+    VRBL ANTENNA_EL A 16 S 4 $
+
+    ''System mode''
+    TYPE SYS_MODE 'STANDBY', 'SEARCH', 'TRACK', 'ENGAGE' $
+    VRBL CURRENT_MODE SYS_MODE P 'STANDBY' $
+
+    ''Track file table''
+    TABLE TRACK_FILE V MEDIUM 256 $
+        FIELD TRACK_ID I 16 U $
+        FIELD STATUS TRACK_STATUS $
+        FIELD RANGE A 20 S 4 $
+        FIELD BEARING A 16 S 8 $
+        FIELD ELEVATION A 16 S 8 $
+        FIELD VELOCITY A 16 S 4 $
+        FIELD COURSE A 16 S 8 $
+        FIELD IFF_CODE I 8 U $
+        FIELD UPDATE_TIME I 32 U $
+        FIELD PRIORITY I 8 U $
+    END-TABLE TRACK_FILE $
+
+    ''Sensor status table''
+    TABLE SENSOR_STATUS V NONE 4 $
+        FIELD SENSOR_ID I 8 U $
+        FIELD OPERATIONAL B $
+        FIELD LAST_CHECK I 32 U $
+    END-TABLE SENSOR_STATUS $
+
+END-SYS-DD RADAR_DD $
+
+''--------------------------------------------------''
+'' SYSTEM PROCEDURE BLOCK - Processing routines     ''
+''--------------------------------------------------''
+RADAR_SP SYS-PROC $
+
+    ''Local data for procedures''
+    LOC-DD $
+        VRBL TEMP_RANGE A 20 S 4 $
+        VRBL TEMP_AZ A 16 S 8 $
+        VRBL TRACK_INDEX I 16 U $
+        VRBL (DX, DY, DZ) A 32 S 16 $
+    END-LOC-DD $
+
+    ''--------------------------------------------------''
+    '' PROCEDURE: Initialise radar subsystem           ''
+    ''--------------------------------------------------''
+    PROCEDURE INIT_RADAR $
+        SET CURRENT_MODE TO 'STANDBY' $
+        SET SCAN_RATE TO 6.0 $
+        SET ANTENNA_AZ TO 0 $
+        SET ANTENNA_EL TO 0 $
+
+        ''Clear all tracks''
+        VARY TRACK_INDEX FROM 0 THRU MAX_TRACKS - 1 $
+            SET TRACK_FILE(TRACK_INDEX, STATUS) TO 'UNASSIGNED' $
+            SET TRACK_FILE(TRACK_INDEX, TRACK_ID) TO 0 $
+        END $
+
+        ''Mark sensors operational''
+        VARY TRACK_INDEX FROM 0 THRU 3 $
+            SET SENSOR_STATUS(TRACK_INDEX, OPERATIONAL) TO 1 $
+        END $
+
+        RETURN $
+    END-PROC INIT_RADAR $
+
+    ''--------------------------------------------------''
+    '' PROCEDURE: Process new detection                ''
+    ''--------------------------------------------------''
+    PROCEDURE PROCESS_DETECTION INPUT RANGE, BEARING, ELEV
+                                 OUTPUT ASSIGNED_TRACK $
+        VRBL RANGE A 20 S 4 $
+        VRBL BEARING A 16 S 8 $
+        VRBL ELEV A 16 S 8 $
+        VRBL ASSIGNED_TRACK I 16 U $
+        VRBL FREE_SLOT I 16 U $
+        VRBL FOUND_SLOT B $
+
+        SET FOUND_SLOT TO 0 $
+        SET FREE_SLOT TO 0 $
+
+        ''Find first unassigned track slot''
+        FIND TRACK_FILE(TRACK_INDEX, STATUS) EQ 'UNASSIGNED'
+             VARYING TRACK_INDEX THRU MAX_TRACKS - 1 $
+            IF DATA FOUND THEN
+                BEGIN $
+                    SET FREE_SLOT TO TRACK_INDEX $
+                    SET FOUND_SLOT TO 1 $
+                END $
+            ELSE
+                BEGIN $
+                    SET ASSIGNED_TRACK TO 0 $
+                    RETURN $
+                END $
+            END $
+
+        ''Assign new track''
+        IF FOUND_SLOT EQ 1 THEN
+            BEGIN $
+                SET TRACK_FILE(FREE_SLOT, STATUS) TO 'TENTATIVE' $
+                SET TRACK_FILE(FREE_SLOT, RANGE) TO RANGE $
+                SET TRACK_FILE(FREE_SLOT, BEARING) TO BEARING $
+                SET TRACK_FILE(FREE_SLOT, ELEVATION) TO ELEV $
+                SET TRACK_FILE(FREE_SLOT, TRACK_ID) TO FREE_SLOT + 1000 $
+                SET ASSIGNED_TRACK TO TRACK_FILE(FREE_SLOT, TRACK_ID) $
+            END $
+        END $
+
+        RETURN $
+    END-PROC PROCESS_DETECTION $
+
+    ''--------------------------------------------------''
+    '' PROCEDURE: Update track with new data           ''
+    ''--------------------------------------------------''
+    PROCEDURE UPDATE_TRACK INPUT TRACK_NUM, NEW_RANGE, NEW_BRG $
+        VRBL TRACK_NUM I 16 U $
+        VRBL NEW_RANGE A 20 S 4 $
+        VRBL NEW_BRG A 16 S 8 $
+        VRBL OLD_RANGE A 20 S 4 $
+        VRBL OLD_BRG A 16 S 8 $
+
+        ''Get current values''
+        SET OLD_RANGE TO TRACK_FILE(TRACK_NUM, RANGE) $
+        SET OLD_BRG TO TRACK_FILE(TRACK_NUM, BEARING) $
+
+        ''Apply smoothing filter (simple average)''
+        SET TRACK_FILE(TRACK_NUM, RANGE) TO (OLD_RANGE + NEW_RANGE) / 2 $
+        SET TRACK_FILE(TRACK_NUM, BEARING) TO (OLD_BRG + NEW_BRG) / 2 $
+
+        ''Promote tentative to firm after update''
+        IF TRACK_FILE(TRACK_NUM, STATUS) EQ 'TENTATIVE' THEN
+            SET TRACK_FILE(TRACK_NUM, STATUS) TO 'FIRM' $
+        END $
+
+        RETURN $
+    END-PROC UPDATE_TRACK $
+
+    ''--------------------------------------------------''
+    '' FUNCTION: Calculate slant range                 ''
+    ''--------------------------------------------------''
+    FUNCTION CALC_SLANT_RANGE(GND_RANGE, ALT) A 20 S 4 $
+        VRBL GND_RANGE A 20 S 4 $
+        VRBL ALT A 16 S 4 $
+        VRBL RESULT A 20 S 4 $
+
+        ''Pythagorean calculation''
+        SET RESULT TO GND_RANGE * GND_RANGE + ALT * ALT $
+        ''Note: actual sqrt would use library routine''
+
+        RETURN (RESULT) $
+    END-FUNCTION CALC_SLANT_RANGE $
+
+    ''--------------------------------------------------''
+    '' FUNCTION: Determine threat priority             ''
+    ''--------------------------------------------------''
+    FUNCTION CALC_PRIORITY(RANGE, VELOCITY) I 8 U $
+        VRBL RANGE A 20 S 4 $
+        VRBL VELOCITY A 16 S 4 $
+        VRBL PRIORITY I 8 U $
+
+        ''Higher priority for close, fast targets''
+        IF RANGE LT 50.0 THEN
+            IF VELOCITY GT 400.0 THEN
+                SET PRIORITY TO 1 $
+            ELSE
+                SET PRIORITY TO 2 $
+            END $
+        ELSIF RANGE LT 100.0 THEN
+            SET PRIORITY TO 3 $
+        ELSE
+            SET PRIORITY TO 4 $
+        END $
+
+        RETURN (PRIORITY) $
+    END-FUNCTION CALC_PRIORITY $
+
+    ''--------------------------------------------------''
+    '' PROCEDURE: Main processing loop                 ''
+    ''--------------------------------------------------''
+    PROCEDURE RADAR_MAIN $
+        LOOP RADAR_LOOP.
+            ''Check system mode''
+            IF CURRENT_MODE EQ 'STANDBY' THEN
+                GOTO RADAR_LOOP $
+            END $
+
+            ''Update antenna position''
+            SET ANTENNA_AZ TO ANTENNA_AZ + SCAN_RATE $
+            IF ANTENNA_AZ GT 360.0 THEN
+                SET ANTENNA_AZ TO ANTENNA_AZ - 360.0 $
+            END $
+
+            ''Process any detections''
+            ''(would interface with hardware here)''
+
+            ''Age existing tracks''
+            VARY TRACK_INDEX FROM 0 THRU MAX_TRACKS - 1 $
+                IF TRACK_FILE(TRACK_INDEX, STATUS) NE 'UNASSIGNED' THEN
+                    ''Would check update time and mark as LOST if stale''
+                END $
+            END $
+
+            ''Continue loop''
+            RESUME RADAR_LOOP $
+        END RADAR_LOOP $
+
+        RETURN $
+    END-PROC RADAR_MAIN $
+
+END-SYS-PROC RADAR_SP $
