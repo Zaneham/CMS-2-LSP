@@ -138,7 +138,9 @@ If you've enjoyed programming systems that track things moving through water at 
 
 - **[HAL/S LSP](https://github.com/Zaneham/hals-lsp)** - NASA's Space Shuttle language. For when the ocean isn't remote enough and you'd prefer your real-time constraints to include vacuum and re-entry heating.
 
-- **[Minuteman Guidance Computer Emulator](https://github.com/Zaneham/Minuteman-computer-emulator)** - An emulator for the computers in those missiles your Aegis system is meant to detect. Circle of life, really.
+- **[Minuteman Guidance Computer Emulator](https://github.com/Zaneham/minuteman-emu)** - An emulator for the computers in those missiles your Aegis system is meant to detect. Circle of life, really.
+
+- **[Minuteman Assembler](https://github.com/Zaneham/minuteman-assembler)** - Two-pass assembler for the D17B/D37C. Because apparently we needed a complete toolchain for the things your ship is tracking. They're writing code; you're tracking it. Everyone has a job to do.
 
 ## Acknowledgements
 
