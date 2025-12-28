@@ -2,7 +2,7 @@
   "name": "cms2-lsp",
   "displayName": "CMS-2 Navy Tactical Language",
   "description": "Language Server Protocol support for CMS-2 (Compiler Monitor System 2) - the US Navy's tactical combat systems language powering Aegis, submarines, and carriers",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Zane Hambly",
   "license": "Apache-2.0",
   "publisher": "ZaneHambly",

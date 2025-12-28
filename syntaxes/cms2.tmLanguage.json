@@ -148,7 +148,7 @@
       "patterns": [
         {
           "name": "keyword.operator.comparison.cms2",
-          "match": "\\b(EQ|NE|LT|GT|LTEQ|GTEQ)\\b"
+          "match": "\\b(EQ|NE|LT|GT|LE|GE|LTEQ|GTEQ)\\b"
         },
         {
           "name": "keyword.operator.logical.cms2",
@@ -184,7 +184,7 @@
       "patterns": [
         {
           "name": "support.function.builtin.cms2",
-          "match": "\\b(SIN|COS|ASIN|ACOS|ATAN|ATAN2|ASIN2|ACOS2|EXP|LN|ALOG|IEXP|ISIN|ICOS|BAMS|RAD|FIRST|LAST|PRED|SUCC|LENGTH|CNT|REM|POS|FIL|SCALF|CONF|TDEF|ANDF|XORF|COMPF|DRF|ACDS|ACDS2|ICDS|VECTORP|VECTORHP|ROTATEP|ROTATEHP)\\b"
+          "match": "\\b(SIN|COS|ASIN|ACOS|ATAN|ATAN2|ASIN2|ACOS2|EXP|LN|ALOG|SQRT|IEXP|ISIN|ICOS|BAMS|RAD|FIRST|LAST|PRED|SUCC|LENGTH|CNT|REM|POS|FIL|SCALF|CONF|TDEF|ANDF|XORF|COMPF|DRF|ACDS|ACDS2|ICDS|VECTORP|VECTORHP|ROTATEP|ROTATEHP|FIX|FLT|INT|FLOAT)\\b"
         }
       ]
     },
