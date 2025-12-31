@@ -1,5 +1,7 @@
 # CMS-2 Language Support for Visual Studio Code
 
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/ZaneHambly.cms2-lsp?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=ZaneHambly.cms2-lsp)
+
 Language Server Protocol (LSP) implementation for **CMS-2** (Compiler Monitor System 2), the US Navy's standard programming language for tactical combat systems.
 
 ## About CMS-2
